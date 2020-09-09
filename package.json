@@ -1,0 +1,31 @@
+{
+  "name": "sifer",
+  "version": "0.0.1",
+  "description": "Sifer is a dependency scanner",
+  "repository": "adlerluiz/sifer",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Adler Luiz",
+  "license": "ISC",
+  "keywords": [
+    "cli",
+    "sifer"
+  ],
+  "bin": {
+    "sifer": "bin/index.js"
+  },
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "cli-spinner": "^0.2.10",
+    "cli-table": "^0.3.1",
+    "semver": "^7.3.2",
+    "yaml": "^1.10.0",
+    "yargs": "^15.4.1"
+  },
+  "devDependencies": {
+    "jest": "^26.4.2"
+  },
+  "optionalDependencies": {}
+}
