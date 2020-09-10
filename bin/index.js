@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 'use strict';
 
 const yargs = require('yargs')
@@ -10,7 +9,7 @@ const Sifer = require('../src');
 
 const argv = yargs.scriptName("sifer")
     .usage('$0 <cmd> [args]')
-    .command('scan [path]', 'Path to be scanned, can be file or directory (note: if the path is not provided, it will use the current path where it is being executed)\n',
+    .command('scan [path]', 'Path to be scanned, can be file or directory (note: if the path is not provided, it will use the current workdir)\n',
         yargs => {
             yargs.positional('path',
                 {
@@ -23,7 +22,7 @@ const argv = yargs.scriptName("sifer")
             await scan(argv)
         }
     )
-/* The update cmd already in progress
+
     .command('update [path]', 'Update file following increment type',
         yargs => {
             yargs.positional('path',
@@ -54,7 +53,7 @@ const argv = yargs.scriptName("sifer")
             }
         }
     )
-*/
+
     .help()
     .alias('version', 'v')
     .alias('help', 'h')
@@ -109,7 +108,7 @@ function printTable(file) {
                 });
 
                 if (dependencies.length) {
-                    result += `\n ${chalk.gray(title.toUpperCase())}\n`
+                    result += `\n ${chalk.gray(title)}\n`
 
                     dependencies
                         .forEach(

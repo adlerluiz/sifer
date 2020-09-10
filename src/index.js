@@ -2,10 +2,10 @@ const utils = require('./utils')
 const Spinner = require('cli-spinner').Spinner;
 
 const composer = require('./managers/composer')
-const dart = require('./managers/dart')
-const node = require('./managers/node')
+const npm = require('./managers/npm')
+const pub = require('./managers/pub')
 
-class Pkgi {
+class Sifer {
     /**
      * Scan given path and return array of files founded
      * @param {String} path 
@@ -63,25 +63,39 @@ class Pkgi {
             type.push('major')
         }
 
-        file = _filterToUpdate(file, type)
-        let fileDir = utils.getFileDir(file.info.path)
+        let filesFiltered = _filterToUpdate(file, type)
+        let fileDir = utils.getFileDir(filesFiltered.info.path)
+        let fileContent = utils.readFile(file.info.path)
+        let replace = filesFiltered.info.manager._replace
 
-        file.content
+        let spinner = new Spinner(`>> Updating '${filesFiltered.info.path}' %s`);
+        spinner.start()
+        console.log('\n')
+
+        filesFiltered.content
             .forEach(
                 pkg => {
-                    process.chdir(fileDir)
-                    console.log(utils.urlReplace(file.info.manager._commands.install, { package: pkg.name, version: pkg.update.version }))
-                    utils.exec(utils.urlReplace(file.info.manager._commands.install, { package: pkg.name, version: pkg.update.version }))
+                    fileContent = fileContent.replace(
+                        utils.replace(replace.old, { name: pkg.name, version: pkg.version.current }),
+                        utils.replace(replace.new, { name: pkg.name, incrementType: _getIncrementType(pkg.version.incrementType), version: pkg.update.version })
+                    )
+                    console.log(`>> ${pkg.name} ${pkg.version.current} => ${pkg.update.version}`)
+                    // console.log(utils.replace(replace.new, { name: pkg.name, incrementType: _getIncrementType(pkg.version.incrementType), version: pkg.update.version }))
                 }
             )
-    }
+        utils.writeFile(filesFiltered.info.path, fileContent)
 
+        process.chdir(fileDir)
+        spinner.stop()
+        console.log(`\n>> ${file.info.manager._cmd}`)
+        utils.exec(file.info.manager._cmd)
+    }
 }
 
 function _getLoader(path) {
     if (path.includes(composer.defaults.file)) return { manager: composer, parser: utils.toJson }
-    if (path.includes(node.defaults.file)) return { manager: node, parser: utils.toJson }
-    if (path.includes(dart.defaults.file)) return { manager: dart, parser: utils.toYaml }
+    if (path.includes(npm.defaults.file)) return { manager: npm, parser: utils.toJson }
+    if (path.includes(pub.defaults.file)) return { manager: pub, parser: utils.toYaml }
 
     return false;
 }
@@ -103,4 +117,15 @@ function _filterToUpdate(file, incrementType) {
     return file
 }
 
-module.exports = new Pkgi()
+function _getIncrementType(incrementType) {
+    switch (incrementType) {
+        case 'patch':
+            return '~'
+        case 'minor':
+            return '^'
+        default:
+            return ''
+    }
+}
+
+module.exports = new Sifer()

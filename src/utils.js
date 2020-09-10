@@ -20,6 +20,11 @@ class Utils {
         throw `File ${path} not found`
     }
 
+    writeFile(path, data) {
+        if (fs.existsSync(path)) return fs.writeFileSync(path, data, { encoding: 'utf-8' })
+        throw `File ${path} not found`
+    }
+
     pathJoin(...paths) {
         return path.join(...paths)
     }
@@ -66,7 +71,7 @@ class Utils {
         }
     }
 
-    urlReplace(url, objReplaceWith) {
+    replace(url, objReplaceWith) {
         let keys = Object.keys(objReplaceWith);
         let urlReturn = url;
 
@@ -84,7 +89,7 @@ class Utils {
     }
 
     fromJson(json) {
-        return JSON.stringify(json)
+        return JSON.stringify(json, null, 2)
     }
 
     toYaml(string) {

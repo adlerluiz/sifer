@@ -17,11 +17,15 @@ const _UPDATE_STATUS = {
 
 module.exports = class Managers {
     constructor(defaults) {
-        this._manager = defaults.manager
         this._file = defaults.file
-        this._registry = defaults.registry
+        this._lock = defaults.lock
+        this._manager = defaults.manager
         this._parser = defaults.parser
+        this._registry = defaults.registry
+        this._search = defaults.search
         this._commands = defaults.commands
+        this._replace = defaults.replace
+        this._cmd = defaults.cmd
     }
 
     async _getDependencies(dependencies) {
@@ -48,7 +52,7 @@ module.exports = class Managers {
 
             let releases = this._getPackageDataVersions(packageData)
 
-            let raw = _pattSemver.exec(version).shift()
+            let raw = semver.valid(semver.coerce(version))
             let incrementType = this._checkIncrementType(version)
             let update = this._getAvailableByIncrementType(releases, raw, incrementType)
 
@@ -67,7 +71,7 @@ module.exports = class Managers {
     }
 
     _getPackageData(packageName) {
-        let url = utils.urlReplace(this._registry, { package: packageName })
+        let url = utils.replace(this._registry, { package: packageName })
 
         return new Promise(
             (resolve, _) => {
@@ -101,21 +105,21 @@ module.exports = class Managers {
         var result = {
             status: _UPDATE_STATUS.UNDEFINED,
             version: '',
-            latest: releases[releases.length - 1]
+            latest: semver.clean(releases[releases.length - 1])
         }
 
         if (releases.length) {
             switch (incrementType) {
                 case _INCREMENT_TYPE.PATCH:
-                    result.version = semver.maxSatisfying(releases, `${currentVersionSplit[0]}.${currentVersionSplit[1]}.*`)
+                    result.version = semver.clean(semver.maxSatisfying(releases, `${currentVersionSplit[0]}.${currentVersionSplit[1]}.*`))
                     break;
 
                 case _INCREMENT_TYPE.MINOR:
-                    result.version = semver.maxSatisfying(releases, `${currentVersionSplit[0]}.*.*`)
+                    result.version = semver.clean(semver.maxSatisfying(releases, `${currentVersionSplit[0]}.*.*`))
                     break;
 
                 case _INCREMENT_TYPE.MAJOR:
-                    result.version = semver.maxSatisfying(releases, '*.*.*')
+                    result.version = semver.clean(semver.maxSatisfying(releases, '*.*.*'))
                     break;
             }
             if (result.version != currentVersion) {

@@ -2,13 +2,17 @@ const Managers = require('./managers')
 
 const _DEFAULTS = {
     file: 'composer.json',
+    lock: 'composer.lock',
     language: 'php',
     manager: 'composer',
     parser: 'json',
     registry: 'https://packagist.org/packages/:package.json',
-    commands: {
-        install: 'php composer require ":package::version"'
-    }
+    search: ['require', 'require-dev'],
+    replace: {
+        old: '":name": ":version"',
+        new: '":name": ":incrementType:version"'
+    },
+    cmd: "php composer install"
 }
 
 class Composer extends Managers {
@@ -22,13 +26,13 @@ class Composer extends Managers {
 
     async getContent(content) {
         try {
-            let dependencies = await this._getDependencies(content['require'])
-            let devDependencies = await this._getDependencies(content['require-dev'])
+            let result = {}
 
-            return {
-                "Require": dependencies,
-                "Require Dev": devDependencies
+            for (const dependencie of _DEFAULTS.search) {
+                result[dependencie] = await this._getDependencies(content[dependencie])
             }
+
+            return result
         } catch (e) {
             console.log('No content for COMPOSER: ' + e)
         }
@@ -45,7 +49,7 @@ class Composer extends Managers {
 
                 if (coerceVersion && hasVendor) {
                     //console.log(`Geting info about ${packageName}...`)
-                    result.push(await this._getDetails(packageName, coerceVersion))
+                    result.push(await this._getDetails(packageName, version))
                 }
 
                 //console.clear()
