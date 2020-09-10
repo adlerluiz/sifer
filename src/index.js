@@ -2,8 +2,10 @@ const utils = require('./utils')
 const Spinner = require('cli-spinner').Spinner;
 
 const composer = require('./managers/composer')
+const flutter = require('./managers/flutter')
 const npm = require('./managers/npm')
 const pub = require('./managers/pub')
+const yarn = require('./managers/yarn')
 
 class Sifer {
     /**
@@ -11,7 +13,7 @@ class Sifer {
      * @param {String} path 
      * @returns {Array} Array of files
      */
-    async scan(path) {
+    async scan(path, argv) {
         let files = []
 
         if (this.isFile(path)) {
@@ -19,7 +21,7 @@ class Sifer {
         } else {
             for (const file of utils.readDir(path)) {
                 let joinedPath = utils.pathJoin(path, file)
-                if (_getLoader(joinedPath)) files.push(joinedPath)
+                if (_getLoader(joinedPath, argv.use)) files.push(joinedPath)
             }
         }
 
@@ -31,10 +33,10 @@ class Sifer {
      * @param {String} path 
      * @returns {Object} File object
      */
-    async readFile(path) {
+    async readFile(path, argv) {
         let spinner = new Spinner(`>> Scanning '${path}' %s`);
         let fileContent;
-        let loader = _getLoader(path)
+        let loader = _getLoader(path, argv.use)
 
         if (loader) {
             spinner.start();
@@ -92,10 +94,26 @@ class Sifer {
     }
 }
 
-function _getLoader(path) {
-    if (path.includes(composer.defaults.file)) return { manager: composer, parser: utils.toJson }
-    if (path.includes(npm.defaults.file)) return { manager: npm, parser: utils.toJson }
-    if (path.includes(pub.defaults.file)) return { manager: pub, parser: utils.toYaml }
+function _getLoader(path, use) {
+    if (path.includes(composer.defaults.file)) {
+        return { manager: composer, parser: utils.toJson }
+    }
+
+    if (path.includes(npm.defaults.file)) {
+        if (use == 'yarn') {
+            return { manager: yarn, parser: utils.toJson }
+        }
+        // Default is npm
+        return { manager: npm, parser: utils.toJson }
+    }
+
+    if (path.includes(pub.defaults.file)) {
+        if (use == 'flutter') {
+            return { manager: flutter, parser: utils.toYaml }
+        }
+        // Default is pub
+        return { manager: pub, parser: utils.toYaml }
+    }
 
     return false;
 }

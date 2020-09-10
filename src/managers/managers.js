@@ -1,7 +1,7 @@
 const utils = require('../utils')
 const semver = require('semver')
 
-const _pattSemver = /(\d+)\.(\d+)\.(\d+)-?([a-zA-Z-\d\.]*)\+?([a-zA-Z-\d\.]*)/
+// const _pattSemver = /(\d+)\.(\d+)\.(\d+)-?([a-zA-Z-\d\.]*)\+?([a-zA-Z-\d\.]*)/
 
 const _INCREMENT_TYPE = {
     PATCH: 'patch',

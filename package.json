@@ -1,6 +1,6 @@
 {
     "name": "sifer",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Sifer is a dependency scanner and updater",
     "repository": "adlerluiz/sifer",
     "main": "index.js",
@@ -11,7 +11,10 @@
     "license": "MIT",
     "keywords": [
         "cli",
-        "sifer"
+        "sifer",
+        "dependency",
+        "scanner",
+        "updater"
     ],
     "bin": {
         "sifer": "bin/index.js"

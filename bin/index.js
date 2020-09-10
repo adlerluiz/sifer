@@ -32,6 +32,10 @@ const argv = yargs.scriptName("sifer")
                     default: '--patch'
                 }
             )
+                .option('use', {
+                    default: '',
+                    description: 'Force use of specific manager'
+                })
                 .option('patch', {
                     description: 'Update patch version'
                 })
@@ -44,8 +48,8 @@ const argv = yargs.scriptName("sifer")
         }, async argv => {
             if (Sifer.isFile(argv.path)) {
                 if (!!argv.path) {
-                    let file = await Sifer.scan(argv.path)
-                    Sifer.update(await Sifer.readFile(file.pop()), argv)
+                    let file = await Sifer.scan(argv.path, argv)
+                    Sifer.update(await Sifer.readFile(file.pop(), argv), argv)
                     scan(argv)
                 }
             } else {
@@ -72,9 +76,9 @@ async function scan(argv) {
      * else scan current workdir
      */
     if (!!argv.path) {
-        files = await Sifer.scan(argv.path)
+        files = await Sifer.scan(argv.path, argv)
     } else {
-        files = await Sifer.scan(process.cwd())
+        files = await Sifer.scan(process.cwd(), argv)
     }
 
     /**
@@ -82,7 +86,7 @@ async function scan(argv) {
      */
     if (files.length) {
         for (const file of files) {
-            printTable(await Sifer.readFile(file))
+            printTable(await Sifer.readFile(file, argv))
         }
     } else {
         console.log('File not found')
